@@ -299,6 +299,7 @@ module.exports = {
 
     // get data from userconf.json
     var args = process.argv;
+
     var userConfPath = path.join('platforms', 'userconf.json');
     var userData = {
       id: '',
@@ -329,10 +330,7 @@ module.exports = {
       }
     });
 
-    if (userData) {
-      console.log({ userData });
-      buildProject();
-    }
+    buildProject();
 
     function buildProject() {
       copySrcToDest() || (errorCallback && errorCallback());
@@ -436,13 +434,16 @@ module.exports = {
       if (result.code) {
         throw Error(result.output);
       } else {
-        var packagePath = result.output.match(/Creating package (.*) in/);
-        if (packagePath && packagePath[1]) {
+        var output = result.output.match(/Create (.*) to (.*)/);
+        var packageName = output[1];
+        var packagePath = output[2];
+
+        if (packagePath) {
           prepareDir(dest);
-          shelljs.mv('-f', packagePath[1], path.resolve(dest));
-          console.log('Package created at ' + path.join(dest, packagePath[1]));
+          shelljs.mv('-f', packagePath + '/' + packageName, path.resolve(dest));
+          console.log('Package created at ' + path.join(dest, packageName));
         } else {
-          throw Error('Fail to retrieve Package File Location.');
+          throw Error('Failed to retrieve package file location.');
         }
       }
     });
